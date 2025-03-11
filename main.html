@@ -4,7 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+        
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            font-family: 'Indie Flower', cursive;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        #input-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        label {
+            font-size: 1.2em;
+        }
+        input {
+            padding: 5px;
+            font-size: 1em;
+            width: 200px;
+            text-align: center;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            border: 1px solid black;
+            background-color: white;
+            cursor: pointer;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            margin-top: 20px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid black;
+            font-size: 2em;
+            cursor: pointer;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -19,9 +82,77 @@
         <div id="game" style="display: none;">
             <div class="message"></div>
             <div class="board" id="board"></div>
+            <button id="reset" style="display: none;">Play Again</button>
         </div>
     </div>
     
-    <script src="script.js"></script>
+    <script>
+        document.getElementById('submit').addEventListener('click', function() {
+            let player1 = document.getElementById('player-1').value;
+            let player2 = document.getElementById('player-2').value;
+            
+            if (player1 && player2) {
+                document.getElementById('input-form').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+                startGame(player1, player2);
+            }
+        });
+        
+        function startGame(player1, player2) {
+            let board = document.getElementById('board');
+            let message = document.querySelector('.message');
+            let cells = [];
+            let currentPlayer = player1;
+            let currentSymbol = 'X';
+            let resetButton = document.getElementById('reset');
+            
+            board.innerHTML = '';
+            message.textContent = `${currentPlayer}, you're up!`;
+            resetButton.style.display = 'none';
+            
+            for (let i = 0; i < 9; i++) {
+                let cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.id = `cell-${i}`;
+                board.appendChild(cell);
+                cells.push(cell);
+                
+                cell.addEventListener('click', function() {
+                    if (!cell.textContent) {
+                        cell.textContent = currentSymbol;
+                        if (checkWin(cells)) {
+                            message.textContent = `${currentPlayer} congratulations, you won!`;
+                            cells.forEach(c => c.style.pointerEvents = 'none');
+                            resetButton.style.display = 'block';
+                        } else {
+                            currentPlayer = (currentPlayer === player1) ? player2 : player1;
+                            currentSymbol = (currentSymbol === 'X') ? 'O' : 'X';
+                            message.textContent = `${currentPlayer}, you're up!`;
+                        }
+                    }
+                });
+            }
+            
+            resetButton.addEventListener('click', function() {
+                document.getElementById('input-form').style.display = 'block';
+                document.getElementById('game').style.display = 'none';
+                document.getElementById('player-1').value = '';
+                document.getElementById('player-2').value = '';
+            });
+        }
+        
+        function checkWin(cells) {
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            
+            return winningCombinations.some(combination => {
+                let [a, b, c] = combination;
+                return cells[a].textContent && cells[a].textContent === cells[b].textContent && cells[a].textContent === cells[c].textContent;
+            });
+        }
+    </script>
 </body>
 </html>
